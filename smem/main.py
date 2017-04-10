@@ -656,78 +656,86 @@ def showbar(l, columns, sort):
     pylab.legend([p[0] for p in pl], key)
     pylab.show()
 
+def parse_args():
+    parser = optparse.OptionParser("%prog [options]")
+    parser.add_option("-H", "--no-header", action="store_true",
+                      help="disable header line")
+    parser.add_option("-c", "--columns", type="str",
+                      help="columns to show")
+    parser.add_option("-t", "--totals", action="store_true",
+                      help="show totals")
+    parser.add_option("-a", "--autosize", action="store_true",
+                      help="size columns to fit terminal size")
+    
+    parser.add_option("-R", "--realmem", type="str",
+                      help="amount of physical RAM")
+    parser.add_option("-K", "--kernel", type="str",
+                      help="path to kernel image")
+    
+    parser.add_option("-m", "--mappings", action="store_true",
+                      help="show mappings")
+    parser.add_option("-u", "--users", action="store_true",
+                      help="show users")
+    parser.add_option("-w", "--system", action="store_true",
+                      help="show whole system")
+    
+    parser.add_option("-P", "--processfilter", type="str",
+                      help="process filter regex")
+    parser.add_option("-M", "--mapfilter", type="str",
+                      help="map filter regex")
+    parser.add_option("-U", "--userfilter", type="str",
+                      help="user filter regex")
+    
+    parser.add_option("-n", "--numeric", action="store_true",
+                      help="numeric output")
+    parser.add_option("-s", "--sort", type="str",
+                      help="field to sort on")
+    parser.add_option("-r", "--reverse", action="store_true",
+                      help="reverse sort")
+    
+    parser.add_option("-p", "--percent", action="store_true",
+                      help="show percentage")
+    parser.add_option("-k", "--abbreviate", action="store_true",
+                      help="show unit suffixes")
+    
+    parser.add_option("", "--pie", type='str',
+                      help="show pie graph")
+    parser.add_option("", "--bar", type='str',
+                      help="show bar graph")
+    
+    parser.add_option("-S", "--source", type="str",
+                      help="/proc data source")
+    
+    
+    defaults = {}
+    parser.set_defaults(**defaults)
+    return parser.parse_args()[0]
 
-parser = optparse.OptionParser("%prog [options]")
-parser.add_option("-H", "--no-header", action="store_true",
-                  help="disable header line")
-parser.add_option("-c", "--columns", type="str",
-                  help="columns to show")
-parser.add_option("-t", "--totals", action="store_true",
-                  help="show totals")
-parser.add_option("-a", "--autosize", action="store_true",
-                  help="size columns to fit terminal size")
-
-parser.add_option("-R", "--realmem", type="str",
-                  help="amount of physical RAM")
-parser.add_option("-K", "--kernel", type="str",
-                  help="path to kernel image")
-
-parser.add_option("-m", "--mappings", action="store_true",
-                  help="show mappings")
-parser.add_option("-u", "--users", action="store_true",
-                  help="show users")
-parser.add_option("-w", "--system", action="store_true",
-                  help="show whole system")
-
-parser.add_option("-P", "--processfilter", type="str",
-                  help="process filter regex")
-parser.add_option("-M", "--mapfilter", type="str",
-                  help="map filter regex")
-parser.add_option("-U", "--userfilter", type="str",
-                  help="user filter regex")
-
-parser.add_option("-n", "--numeric", action="store_true",
-                  help="numeric output")
-parser.add_option("-s", "--sort", type="str",
-                  help="field to sort on")
-parser.add_option("-r", "--reverse", action="store_true",
-                  help="reverse sort")
-
-parser.add_option("-p", "--percent", action="store_true",
-                  help="show percentage")
-parser.add_option("-k", "--abbreviate", action="store_true",
-                  help="show unit suffixes")
-
-parser.add_option("", "--pie", type='str',
-                  help="show pie graph")
-parser.add_option("", "--bar", type='str',
-                  help="show bar graph")
-
-parser.add_option("-S", "--source", type="str",
-                  help="/proc data source")
-
-
-defaults = {}
-parser.set_defaults(**defaults)
-(options, args) = parser.parse_args()
-
-try:
-    src = tardata(options.source)
-except:
-    src = procdata(options.source)
-
-try:
-    if options.mappings:
-        showmaps()
-    elif options.users:
-        showusers()
-    elif options.system:
-        showsystem()
-    else:
-        showpids()
-except IOError:
-    _, e, _ = sys.exc_info()
-    if e.errno == errno.EPIPE:
+src = None
+options = None
+def main():
+    """an attempt to make this work even though there's global values"""
+    global options
+    global src
+    options = parse_args()
+    try:
+        src = tardata(options.source)
+    except:
+        src = procdata(options.source)
+    
+    try:
+        if options.mappings:
+            showmaps()
+        elif options.users:
+            showusers()
+        elif options.system:
+            showsystem()
+        else:
+            showpids()
+    except IOError:
+        _, e, _ = sys.exc_info()
+        if e.errno == errno.EPIPE:
+            pass
+    except KeyboardInterrupt:
         pass
-except KeyboardInterrupt:
-    pass
+

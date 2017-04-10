@@ -1,0 +1,71 @@
+#+Title: SMEM Memory Profiler Update
+
+This is an update of the [[https://www.selenic.com/smem/][smem]] command-line memory reporting tool created by Matt Mackall. The idea is to make it both python 2.7 and python 3.5+ compatible. There are other repositories that do this (I think), but I want to document it as well and use it as a python library as well as (or maybe more than) a command-line tool.
+
+The documentation page is [[https://necromuralist.github.io/smem/][here]] and the repository for the code is on [[https://github.com/necromuralist/smem][github]].
+
+* Setting Up
+  The only dependency is the [[http://python-future.org][future]] package. When you install =smem= it will try and install it for you. If you cloned the repository then you can install it with the =setup.py= file.
+
+#+BEGIN_SRC sh
+python setup.py install
+#+END_SRC
+
+If you didn't download the repository but you have your ssh-keys set up, you can install it directly from github.
+
+#+BEGIN_SRC sh
+pip install git+ssh://https://github.com/necromuralist/smem
+#+END_SRC
+
+Either of these methods will install the code in your site-packages so you can use it in python functions as well as installing the command-line =smem= command.
+
+* Examples
+
+=smem= has the typical python command-line interface. You can see the options using the =--help= or =-h= flags.
+
+#+BEGIN_SRC sh :results output
+smem -h
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+Usage: smem [options]
+
+Options:
+  -h, --help            show this help message and exit
+  -H, --no-header       disable header line
+  -c COLUMNS, --columns=COLUMNS
+                        columns to show
+  -t, --totals          show totals
+  -a, --autosize        size columns to fit terminal size
+  -R REALMEM, --realmem=REALMEM
+                        amount of physical RAM
+  -K KERNEL, --kernel=KERNEL
+                        path to kernel image
+  -m, --mappings        show mappings
+  -u, --users           show users
+  -w, --system          show whole system
+  -P PROCESSFILTER, --processfilter=PROCESSFILTER
+                        process filter regex
+  -M MAPFILTER, --mapfilter=MAPFILTER
+                        map filter regex
+  -U USERFILTER, --userfilter=USERFILTER
+                        user filter regex
+  -n, --numeric         numeric output
+  -s SORT, --sort=SORT  field to sort on
+  -r, --reverse         reverse sort
+  -p, --percent         show percentage
+  -k, --abbreviate      show unit suffixes
+  --pie=PIE             show pie graph
+  --bar=BAR             show bar graph
+  -S SOURCE, --source=SOURCE
+                        /proc data source
+#+end_example
+
+There are too many processes to really show the non-system output here, but this what the system use on my computer is.
+
+#+BEGIN_SRC sh
+smem -wpt
+#+END_SRC
+
+#+RESULTS:

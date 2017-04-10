@@ -1,0 +1,6 @@
+appdirs==1.4.3
+future==0.16.0
+packaging==16.8
+pyparsing==2.2.0
+six==1.10.0
+-e git+git@github.com:necromuralist/smem.git@ce108fd0edb93286bcb7974a86bc6475a74edf4c#egg=smem
