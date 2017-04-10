@@ -6,12 +6,27 @@ import random
 # third party
 from expects import equal
 from expects import expect
+from expects import raise_error
 from mock import MagicMock
 from mock import patch
 import pytest
 
 # this package
 from smem.process import Process
+
+@pytest.fixture
+def os_mock(mocker):
+    # the mocker fixture tearsdown the patch for you
+    mock = mocker.patch('{0}.os'.format(Process.__module__),
+                        autospec=True)
+    return mock
+
+@pytest.fixture
+def open_smaps(mocker):
+    mock = mocker.patch("{0}.open".format(Process.__module__))
+    mock.return_value = StringIO(SMAPS)
+    return mock
+
 
 class TestProcess(object):
     @pytest.fixture(autouse=True)
@@ -21,10 +36,7 @@ class TestProcess(object):
         process = Process(self.source, self.process_id)
         return process
 
-    def test_directory(self, process, mocker):
-        # the mocker fixture tearsdown the patch for you
-        os_mock = mocker.patch('{0}.os'.format(Process.__module__),
-                               autospec=True)
+    def test_directory(self, process, os_mock):
         directory_list = "1 2 5 6 7 version".split()
         process_path = self.source + str(self.process_id)
         os_mock.listdir.return_value = directory_list
@@ -39,12 +51,9 @@ class TestProcess(object):
         expect(process.map_data).to(equal("{0}{1}/smaps".format(
             self.source,
             self.process_id)))
-        return
-        
+        return        
 
-    def test_process_maps(self, process, mocker):
-        open_mock = mocker.patch("{0}.open".format(Process.__module__))
-        open_mock.return_value = StringIO(SMAPS)
+    def test_process_maps(self, process, open_smaps):
         outcome = process.process_maps
         expected_pss = 5804, 5776
 
@@ -74,6 +83,17 @@ class TestProcess(object):
         expect(totals["shared_dirty"]).to(equal(0))
         expect(totals["private_clean"]).to(equal(5804 + 5776))
         expect(totals["private_dirty"]).to(equal(0))
+        return
+
+    def test_totals_attributes(self, process, open_smaps):
+        expect(process.pss).to(equal(5804 + 5776))
+        return
+
+    def test_bad_property(self, process, open_smaps):
+        def bad_property():
+            return process.aoeuec
+
+        expect(bad_property).to(raise_error(AttributeError))
         return
 
     def test_process_name(self, process, mocker):

@@ -142,3 +142,13 @@ class Process(object):
         """clears the data dictionaries"""
         self._process_totals = None
         self._process_maps = None
+        return
+
+    def __getattr__(self, key):
+        """gets the process-total matching the key"""
+        try:
+            return self.process_totals[key]
+        except KeyError:
+            raise AttributeError("Unknown process total: {0}".format(key))
+
+        
